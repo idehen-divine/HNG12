@@ -23,6 +23,6 @@ Route::get('/', function (Request $request) {
     return response()->json([
         'email' => 'idehendivine16@gmail.com',
         'current_datetime' => now()->toIso8601String(),
-        'github_url' => 'https://github.com/yourusername/HNG12',
+        'github_url' => 'https://github.com/idehen-divine/HNG12',
     ]);
 });
