@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,15 +16,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
 
-Route::get('/', function (Request $request) {
-    return response()->json([
-        'email' => 'idehendivine16@gmail.com',
-        'current_datetime' => now()->toIso8601String(),
-        'github_url' => 'https://github.com/idehen-divine/HNG12',
-    ]);
-});
+Route::get('/user', [ApiController::class, 'index']);

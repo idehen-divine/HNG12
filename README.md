@@ -5,7 +5,7 @@ This project is part of the HNG12 Internship Stage 0 task for backend developers
 ## Project Description
 
 This API provides the following information:
-- **Email:** Your registered email address on the HNG12 Slack workspace.
+- **Email:** My registered email address on the HNG12 Slack workspace.
 - **Current DateTime:** The current date and time in ISO 8601 format (UTC).
 - **GitHub URL:** The URL of this project's codebase hosted on GitHub.
 
@@ -22,7 +22,6 @@ This API provides the following information:
 - [Laravel](https://laravel.com/) (PHP Framework)
 - PHP 8.x
 - GitHub Actions (for CI/CD)
-- Railway.app
 
 ## Getting Started
 
@@ -73,66 +72,17 @@ This API provides the following information:
 
 ## API Documentation
 
-### Endpoint
+For the full API reference including endpoint details, parameters, and examples, please refer to the auto-generated documentation provided by Scribe:
 
-- **URL:** `/api`
-- **Method:** `GET`
-- **CORS:** Enabled (allows all origins)
-
-### Response Format
-
-On a successful request (HTTP 200 OK), the API returns a JSON response in the following format:
-
-```json
-{
-  "email": "your-email@example.com",
-  "current_datetime": "2025-01-30T09:30:00Z",
-  "github_url": "https://github.com/yourusername/your-repo"
-}
-```
-
-- **email:** Replace this with your registered email.
-- **current_datetime:** A dynamically generated ISO 8601 timestamp in UTC.
-- **github_url:** The link to this GitHub repository.
-
-### Example Request using `curl`
-
-```bash
-curl -X GET https://your-deployed-api-url/api
-```
-
-### Example Response
-
-```json
-{
-  "email": "your-email@example.com",
-  "current_datetime": "2025-01-30T09:30:00Z",
-  "github_url": "https://github.com/yourusername/your-repo"
-}
-```
+[View API Documentation](https://hng12-backend.koyeb.app/docs/)
 
 ## Deployment
 
-This project is set up for continuous deployment using GitHub Actions. Every push to the `main` branch triggers a deployment workflow to your chosen hosting platform (e.g., Railway.app, Heroku).
-
-### GitHub Actions Workflow
-
-The deployment workflow is defined in `.github/workflows/deploy.yml` and includes steps for:
-- Checking out the repository.
-- Setting up PHP.
-- Installing Composer dependencies.
-- Deploying to the hosting platform using Railway CLI or other relevant tools.
-
-Ensure you add your hosting platform token (e.g., `RAILWAY_TOKEN`) to the repository secrets.
-
+This project is set up for continuous deployment using GitHub Actions. Every push to the `main` branch triggers a deployment workflow.
 ## Useful Links
 
 - [Hire PHP Developers](https://hng.tech/hire/php-developers)
 - [Laravel Documentation](https://laravel.com/docs)
-
-## License
-
-This project is open-source and available under the [MIT License](LICENSE).
 
 ---
 
