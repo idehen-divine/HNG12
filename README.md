@@ -74,8 +74,7 @@ This API provides the following information:
 
 For the full API reference including endpoint details, parameters, and examples, please refer to the auto-generated documentation provided by Scribe:
 
-[View API Documentation](https://hng12-backend.koyeb.app/docs/)
-[View Stage O Task API](https://hng12-backend.koyeb.app/api/user)
+[View API Documentation](https://hng12-backend.koyeb.app/)
 
 ## Deployment
 
