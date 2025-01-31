@@ -47,7 +47,7 @@ return [
     'type' => 'laravel',
 
     // See https://scribe.knuckles.wtf/laravel/reference/config#theme for supported options
-    'theme' => 'elements',
+    'theme' => 'default',
 
     'static' => [
         // HTML documentation, assets and Postman collection will be generated to this folder.

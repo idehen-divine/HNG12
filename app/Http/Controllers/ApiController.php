@@ -34,7 +34,7 @@ class ApiController extends Controller
     {
         return response()->json([
             'email' => 'idehendivine16@gmail.com',
-            'current_datetime' => now()->toIso8601String(),
+            'current_datetime' => now(),
             'github_url' => 'https://github.com/idehen-divine/HNG12',
         ]);
     }
