@@ -45,8 +45,7 @@ class NumberController extends Controller
     public function classifyNumber(Request $request)
     {
         $number = $request->query('number');
-
-        // Validate input (must be an integer)
+        
         if (!is_numeric($number) || intval($number) != $number) {
             return response()->json([
                 "number" => 'alphabet',
@@ -56,25 +55,21 @@ class NumberController extends Controller
 
         $number = intval($number);
 
-        // Check properties
         $isPrime = $this->isPrime($number);
         $isPerfect = $this->isPerfect($number);
         $isArmstrong = $this->isArmstrong($number);
         $isOdd = $number % 2 !== 0;
         $digitSum = array_sum(str_split($number));
 
-        // Get fun fact from Numbers API
         $funFactResponse = Http::get("http://numbersapi.com/{$number}/math");
         $funFact = $funFactResponse->successful() ? $funFactResponse->body() : "No fun fact available.";
 
-        // Determine properties array
         $properties = [];
         if ($isArmstrong) {
             $properties[] = "armstrong";
         }
         $properties[] = $isOdd ? "odd" : "even";
 
-        // JSON response
         return response()->json([
             "number" => $number,
             "is_prime" => $isPrime,
@@ -85,7 +80,12 @@ class NumberController extends Controller
         ]);
     }
 
-    // Check if number is prime
+    /**
+     * Checks if the given number is prime.
+     *
+     * @param int $num The number to check for primality.
+     * @return bool True if the number is prime, false otherwise.
+     */
     private function isPrime($num)
     {
         if ($num < 2) return false;
@@ -95,7 +95,14 @@ class NumberController extends Controller
         return true;
     }
 
-    // Check if number is perfect
+    /**
+     * Checks if the given number is a perfect number.
+     *
+     * A perfect number is a positive integer that is equal to the sum of its proper divisors, excluding the number itself.
+     *
+     * @param int $num The number to check for perfection.
+     * @return bool True if the number is perfect, false otherwise.
+     */
     private function isPerfect($num)
     {
         $sum = 0;
@@ -107,7 +114,14 @@ class NumberController extends Controller
         return $sum === $num;
     }
 
-    // Check if number is Armstrong
+    /**
+     * Checks if the given number is an Armstrong number.
+     *
+     * An Armstrong number is a number that is equal to the sum of the cubes of its digits.
+     *
+     * @param int $num The number to check for being an Armstrong number.
+     * @return bool True if the number is an Armstrong number, false otherwise.
+     */
     private function isArmstrong($num)
     {
         $digits = str_split($num);
