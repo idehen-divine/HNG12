@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\NumberController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,3 +23,5 @@ use App\Http\Controllers\ApiController;
 
 
 Route::get('/user', [ApiController::class, 'index']);
+
+Route::get('/stage-one', [NumberController::class, 'classifyNumber']);

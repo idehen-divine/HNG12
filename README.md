@@ -1,15 +1,16 @@
-# HNG Stage 0 API Task - Laravel Backend
+# HNG 12 Tasks Repo - Laravel Backend
 
-This project is part of the HNG12 Internship Stage 0 task for backend developers. It is a simple Laravel API that returns basic information in JSON format.
+This project is part of the HNG12 Internship tasks for backend developers. It is a simple Laravel API that returns basic information in JSON format.
 
 ## Project Description
 
+### Stage: 0
 This API provides the following information:
 - **Email:** My registered email address on the HNG12 Slack workspace.
 - **Current DateTime:** The current date and time in ISO 8601 format (UTC).
 - **GitHub URL:** The URL of this project's codebase hosted on GitHub.
 
-## Features
+#### Features
 
 - **Public API Endpoint:** Accepts GET requests and returns a JSON response.
 - **Dynamic Timestamp:** Generates the current datetime dynamically.
