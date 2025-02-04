@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>HNG Stage 0 API Task - Laravel Backend Docs</title>
+    <title>HNG12 API Task - Laravel Backend Docs</title>
 
     <link href="https://fonts.googleapis.com/css?family=PT+Sans&display=swap" rel="stylesheet">
 
@@ -275,7 +275,7 @@
      style="width: calc((100% - 1800px) / 2 + 300px); padding-left: calc((100% - 1800px) / 2); min-width: 300px; max-height: 100vh">
     <div class="sl-flex sl-items-center sl-mb-5 sl-ml-4">
                 <h4 class="sl-text-paragraph sl-leading-snug sl-font-prose sl-font-semibold sl-text-heading">
-            HNG Stage 0 API Task - Laravel Backend Docs
+            HNG12 API Task - Laravel Backend Docs
         </h4>
     </div>
 
@@ -378,7 +378,7 @@
         <div class="sl-mb-10">
             <div class="sl-mb-4">
                 <h1 class="sl-text-5xl sl-leading-tight sl-font-prose sl-font-semibold sl-text-heading">
-                    HNG Stage 0 API Task - Laravel Backend Docs
+                    HNG12 API Task - Laravel Backend Docs
                 </h1>
                                             </div>
 
