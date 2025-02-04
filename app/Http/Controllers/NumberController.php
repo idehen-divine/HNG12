@@ -5,8 +5,43 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
+/**
+ * @group Number Operations
+ * @groupDescription Handles mathematical analysis and classification of numbers, providing detailed properties and interesting facts about given numbers.
+ */
 class NumberController extends Controller
 {
+    /**
+     * Number Classification
+     *
+     * Analyzes a number and returns its mathematical properties including primality,
+     * perfectness, Armstrong status, odd/even status, digit sum and a fun math fact.
+     *
+     * @queryParam number integer required The number to analyze. Example: 153
+     *
+     * @response 200 {
+     *   "number": 153,
+     *   "is_prime": false,
+     *   "is_perfect": false,
+     *   "properties": ["armstrong", "odd"],
+     *   "digit_sum": 9,
+     *   "fun_fact": "153 is the sum of the cubes of its own digits"
+     * }
+     *
+     * @response 400 scenario="Invalid Input" {
+     *   "number": "alphabet",
+     *   "error": true
+     * }
+     *
+     * @responseField number integer The analyzed number
+     * @responseField is_prime boolean Whether the number is prime
+     * @responseField is_perfect boolean Whether the number is perfect
+     * @responseField properties array List of number properties (armstrong, odd/even)
+     * @responseField digit_sum integer Sum of all digits in the number
+     * @responseField fun_fact string An interesting mathematical fact about the number
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function classifyNumber(Request $request)
     {
         $number = $request->query('number');
