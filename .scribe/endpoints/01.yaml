@@ -1,0 +1,130 @@
+name: 'Number Operations'
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - GET
+    uri: api/stage-one
+    metadata:
+      groupName: 'Number Operations'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Number Classification'
+      description: |-
+        Analyzes a number and returns its mathematical properties including primality,
+        perfectness, Armstrong status, odd/even status, digit sum and a fun math fact.
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      number:
+        name: number
+        description: 'The number to analyze.'
+        required: true
+        example: 153
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      number: 153
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "number": 153,
+            "is_prime": false,
+            "is_perfect": false,
+            "properties": ["armstrong", "odd"],
+            "digit_sum": 9,
+            "fun_fact": "153 is the sum of the cubes of its own digits"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 400
+        content: |-
+          {
+            "number": "alphabet",
+            "error": true
+          }
+        headers: []
+        description: 'Invalid Input'
+        custom: []
+    responseFields:
+      number:
+        name: number
+        description: 'The analyzed number'
+        required: false
+        example: null
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      is_prime:
+        name: is_prime
+        description: 'Whether the number is prime'
+        required: false
+        example: null
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      is_perfect:
+        name: is_perfect
+        description: 'Whether the number is perfect'
+        required: false
+        example: null
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      properties:
+        name: properties
+        description: 'List of number properties (armstrong, odd/even)'
+        required: false
+        example: null
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      digit_sum:
+        name: digit_sum
+        description: 'Sum of all digits in the number'
+        required: false
+        example: null
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      fun_fact:
+        name: fun_fact
+        description: 'An interesting mathematical fact about the number'
+        required: false
+        example: null
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
