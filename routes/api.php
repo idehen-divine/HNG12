@@ -24,4 +24,4 @@ use App\Http\Controllers\NumberController;
 
 Route::get('/user', [ApiController::class, 'index']);
 
-Route::get('/stage-one', [NumberController::class, 'classifyNumber']);
+Route::get('/classify-number', [NumberController::class, 'classifyNumber']);
