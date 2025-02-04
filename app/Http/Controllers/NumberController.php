@@ -45,7 +45,7 @@ class NumberController extends Controller
     public function classifyNumber(Request $request)
     {
         $number = $request->query('number');
-        
+
         if (!is_numeric($number) || intval($number) != $number) {
             return response()->json([
                 "number" => 'alphabet',
@@ -57,9 +57,9 @@ class NumberController extends Controller
 
         $isPrime = $this->isPrime($number);
         $isPerfect = $this->isPerfect($number);
-        $isArmstrong = $this->isArmstrong($number);
+        $isArmstrong = $this->isArmstrong(abs($number));
         $isOdd = $number % 2 !== 0;
-        $digitSum = array_sum(str_split($number));
+        $digitSum = $this->digitSum($number);
 
         $funFactResponse = Http::get("http://numbersapi.com/{$number}/math");
         $funFact = $funFactResponse->successful() ? $funFactResponse->body() : "No fun fact available.";
@@ -128,5 +128,17 @@ class NumberController extends Controller
         $power = count($digits);
         $sum = array_sum(array_map(fn($d) => pow($d, $power), $digits));
         return $sum === $num;
+    }
+
+    /**
+     * Calculates the sum of the digits of the given number.
+     *
+     * @param int $num The number to calculate the digit sum for.
+     * @return int The sum of the digits of the number.
+     */
+    private function digitSum($num)
+    {
+        $sum = array_sum(str_split((string) abs($num)));
+        return $num < 0 ? -$sum : $sum;
     }
 }
