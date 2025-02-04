@@ -11,7 +11,7 @@ return [
 
     // The base URL displayed in the docs. If this is empty, Scribe will use the value of config('app.url') at generation time.
     // If you're using `laravel` type, you can set this to a dynamic string, like '{{ config("app.tenant_url") }}' to get a dynamic base URL.
-    'base_url' => "https://hng12-backend.koyeb.app/api/",
+    'base_url' => "https://hng12-backend.koyeb.app/",
 
     'routes' => [
         [
@@ -80,7 +80,7 @@ return [
     'try_it_out' => [
         // Add a Try It Out button to your endpoints so consumers can test endpoints right from their browser.
         // Don't forget to enable CORS headers for your endpoints.
-        'enabled' => false,
+        'enabled' => true,
 
         // The base URL for the API tester to use (for example, you can set this to your staging URL).
         // Leave as null to use the current app URL when generating (config("app.url")).

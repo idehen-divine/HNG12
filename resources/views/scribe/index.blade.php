@@ -21,6 +21,138 @@
         window.CodeJar = CodeJar;
     </script>
 
+            <script>
+            var tryItOutBaseUrl = "https://hng12-backend.koyeb.app";
+            var useCsrf = Boolean();
+            var csrfUrl = "/sanctum/csrf-cookie";
+        </script>
+        <script src="{{ asset("/vendor/scribe/js/tryitout-4.39.0.js") }}"></script>
+        <style>
+            .code-editor, .response-content {
+                color: whitesmoke;
+                background-color: transparent;
+            }
+            /*
+             Problem: we want syntax highlighting for the Try It Out JSON body code editor
+             However, the Try It Out area uses a dark background, while request and response samples
+             (which are already highlighted) use a light background. HighlightJS can only use one theme per document.
+             Our options:
+             1. Change the bg of one. => No, it looks out of place on the page.
+             2. Use the same highlighting for both. => Nope, one would be unreadable.
+             3. Copy styles for a dark-bg h1js theme and prefix them for the CodeEditor, which is what we're doing.
+             Since it's only JSON, we only need a few styles anyway.
+             Styles taken from the Nord theme: https://github.com/highlightjs/highlight.js/blob/3997c9b430a568d5ad46d96693b90a74fc01ea7f/src/styles/nord.css#L2
+             */
+            .code-editor > .hljs-attr {
+                color: #8FBCBB;
+            }
+            .code-editor > .hljs-string {
+                color: #A3BE8C;
+            }
+            .code-editor > .hljs-number {
+                color: #B48EAD;
+            }
+            .code-editor > .hljs-literal{
+                color: #81A1C1;
+            }
+
+        </style>
+
+        <script>
+            function tryItOut(btnElement) {
+                btnElement.disabled = true;
+
+                let endpointId = btnElement.dataset.endpoint;
+
+                let errorPanel = document.querySelector(`.tryItOut-error[data-endpoint=${endpointId}]`);
+                errorPanel.hidden = true;
+                let responsePanel = document.querySelector(`.tryItOut-response[data-endpoint=${endpointId}]`);
+                responsePanel.hidden = true;
+
+                let form = btnElement.form;
+                let { method, path, hasjsonbody: hasJsonBody} = form.dataset;
+                let body = {};
+                if (hasJsonBody === "1") {
+                    body = form.querySelector('.code-editor').textContent;
+                } else if (form.dataset.hasfiles === "1") {
+                    body = new FormData();
+                    form.querySelectorAll('input[data-component=body]')
+                        .forEach(el => {
+                            if (el.type === 'file') {
+                                if (el.files[0]) body.append(el.name, el.files[0])
+                            } else body.append(el.name, el.value);
+                        });
+                } else {
+                    form.querySelectorAll('input[data-component=body]').forEach(el => {
+                        _.set(body, el.name, el.value);
+                    });
+                }
+
+                const urlParameters = form.querySelectorAll('input[data-component=url]');
+                urlParameters.forEach(el => (path = path.replace(new RegExp(`\\{${el.name}\\??}`), el.value)));
+
+                const headers = Object.fromEntries(Array.from(form.querySelectorAll('input[data-component=header]'))
+                    .map(el => [el.name, (el.dataset.prefix || '') + el.value]));
+
+                const query = {}
+                form.querySelectorAll('input[data-component=query]').forEach(el => {
+                    _.set(query, el.name, el.value);
+                });
+
+                let preflightPromise = Promise.resolve();
+                if (window.useCsrf && window.csrfUrl) {
+                    preflightPromise = makeAPICall('GET', window.csrfUrl).then(() => {
+                        headers['X-XSRF-TOKEN'] = getCookie('XSRF-TOKEN');
+                    });
+                }
+
+                // content type has to be unset otherwise file upload won't work
+                if (form.dataset.hasfiles === "1") {
+                    delete headers['Content-Type'];
+                }
+
+                return preflightPromise.then(() => makeAPICall(method, path, body, query, headers, endpointId))
+                    .then(([responseStatus, statusText, responseContent, responseHeaders]) => {
+                        responsePanel.hidden = false;
+                        responsePanel.querySelector(`.response-status`).textContent = responseStatus + " " + statusText ;
+
+                        let contentEl = responsePanel.querySelector(`.response-content`);
+                        if (responseContent === '') {
+                            contentEl.textContent = contentEl.dataset.emptyResponseText;
+                            return;
+                        }
+
+                        // Prettify it if it's JSON
+                        let isJson = false;
+                        try {
+                            const jsonParsed = JSON.parse(responseContent);
+                            if (jsonParsed !== null) {
+                                isJson = true;
+                                responseContent = JSON.stringify(jsonParsed, null, 4);
+                            }
+                        } catch (e) {}
+
+                        // Replace HTML entities
+                        responseContent = responseContent.replace(/[<>&]/g, (i) => '&#' + i.charCodeAt(0) + ';');
+
+                        contentEl.innerHTML = responseContent;
+                        isJson && window.hljs.highlightElement(contentEl);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        let errorMessage = err.message || err;
+                        errorPanel.hidden = false;
+                        errorPanel.querySelector(`.error-message`).textContent = errorMessage;
+                    })
+                    .finally(() => { btnElement.disabled = false } );
+            }
+
+            window.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.tryItOut-btn').forEach(el => {
+                    el.addEventListener('click', () => tryItOut(el));
+                });
+            })
+        </script>
     
 </head>
 
@@ -185,10 +317,10 @@
                                                     <div class="children" style="display: none;">
                                                                     <div class="expandable">
                                         <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
-                                             id="toc-item-number-operations-GETapi-stage-one">
+                                             id="toc-item-number-operations-GETapi-classify-number">
                                             <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Number Classification">
                                                 <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
-                                                   href="#number-operations-GETapi-stage-one">
+                                                   href="#number-operations-GETapi-classify-number">
                                                     Number Classification
                                                 </a>
                                             </div>
@@ -254,7 +386,7 @@
                 <h1 id="introduction">Introduction</h1>
 <p>This API documentation is auto-generated by <a href="https://scribe.knuckles.wtf/">Scribe</a>, ensuring it always reflects the current state of the API. For detailed endpoint specifications, request parameters, and response examples, please refer to the Scribe-generated docs.</p>
 <aside>
-    <strong>Base URL</strong>: <code>https://hng12-backend.koyeb.app/api/</code>
+    <strong>Base URL</strong>: <code>https://hng12-backend.koyeb.app/</code>
 </aside>
 <p>This documentation aims to provide all the information you need to work with our API.</p>
 <aside>As you scroll, you'll see code examples for working with the API in different programming languages in the dark area to the right (or as part of the content on mobile).
@@ -278,14 +410,14 @@ You can switch the language used with the tabs at the top right (or from the nav
         <div class="sl-relative">
             <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
                 <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
-                    id="number-operations-GETapi-stage-one">
+                    id="number-operations-GETapi-classify-number">
                     Number Classification
                 </h2>
             </div>
         </div>
 
         <div class="sl-relative">
-            <div title="https://hng12-backend.koyeb.app/api/api/stage-one"
+            <div title="https://hng12-backend.koyeb.app/api/classify-number"
                      class="sl-stack sl-stack--horizontal sl-stack--3 sl-inline-flex sl-flex-row sl-items-center sl-max-w-full sl-font-mono sl-py-2 sl-pr-4 sl-bg-canvas-50 sl-rounded-lg"
                 >
                                             <div class="sl-text-lg sl-font-semibold sl-px-2.5 sl-py-1 sl-text-on-primary sl-rounded-lg"
@@ -295,8 +427,8 @@ You can switch the language used with the tabs at the top right (or from the nav
                         </div>
                                         <div class="sl-flex sl-overflow-x-hidden sl-text-lg sl-select-all">
                         <div dir="rtl"
-                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">https://hng12-backend.koyeb.app/api</div>
-                        <div class="sl-flex-1 sl-font-semibold">/api/stage-one</div>
+                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">https://hng12-backend.koyeb.app</div>
+                        <div class="sl-flex-1 sl-font-semibold">/api/classify-number</div>
                     </div>
 
                                     </div>
@@ -377,7 +509,7 @@ perfectness, Armstrong status, odd/even status, digit sum and a fun math fact.</
                 <span>Example:</span> <!-- <span> important for spacing -->
                 <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
                     <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        153
+                        371
                     </div>
                 </div>
             </div>
@@ -502,6 +634,161 @@ perfectness, Armstrong status, odd/even status, digit sum and a fun math fact.</
         <div data-testid="two-column-right" class="sl-relative sl-w-2/5 sl-ml-16" style="max-width: 500px;">
             <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
 
+                                    <div class="sl-inverted">
+    <div class="sl-overflow-y-hidden sl-rounded-lg">
+        <form class="TryItPanel sl-bg-canvas-100 sl-rounded-lg"
+              data-method="GET"
+              data-path="api/classify-number"
+              data-hasfiles="0"
+              data-hasjsonbody="0">
+            
+                            <div class="sl-panel sl-outline-none sl-w-full expandable">
+                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
+                         role="button">
+                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
+                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
+                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
+                                     data-icon="caret-down"
+                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
+                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                                    <path fill="currentColor"
+                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
+                                </svg>
+                            </div>
+                            Headers
+                        </div>
+                    </div>
+                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
+                        <div class="ParameterGrid sl-p-4">
+                                                                                            <label aria-hidden="true"
+                                       for="header-GETapi-classify-number-Content-Type">Content-Type</label>
+                                <span class="sl-mx-3">:</span>
+                                <div class="sl-flex sl-flex-1">
+                                    <div class="sl-input sl-flex-1 sl-relative">
+                                        <input aria-label="Content-Type" name="Content-Type"
+                                               id="header-GETapi-classify-number-Content-Type"
+                                               value="application/json" data-component="header"
+                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
+                                    </div>
+                                </div>
+                                                                                            <label aria-hidden="true"
+                                       for="header-GETapi-classify-number-Accept">Accept</label>
+                                <span class="sl-mx-3">:</span>
+                                <div class="sl-flex sl-flex-1">
+                                    <div class="sl-input sl-flex-1 sl-relative">
+                                        <input aria-label="Accept" name="Accept"
+                                               id="header-GETapi-classify-number-Accept"
+                                               value="application/json" data-component="header"
+                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
+                                    </div>
+                                </div>
+                                                    </div>
+                    </div>
+                </div>
+            
+            
+                            <div class="sl-panel sl-outline-none sl-w-full expandable">
+                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
+                         role="button">
+                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
+                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
+                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
+                                     data-icon="caret-down"
+                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
+                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                                    <path fill="currentColor"
+                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
+                                </svg>
+                            </div>
+                            Query Parameters
+                        </div>
+                    </div>
+                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
+                        <div class="ParameterGrid sl-p-4">
+                                                                                            <label aria-hidden="true"
+                                       for="queryparam-GETapi-classify-number-number">number</label>
+                                <span class="sl-mx-3">:</span>
+                                <div class="sl-flex sl-flex-1">
+                                    <div class="sl-input sl-flex-1 sl-relative">
+                                                                                    <input aria-label="number" name="number"
+                                                   id="queryparam-GETapi-classify-number-number"
+                                                   placeholder="The number to analyze."
+                                                   value="371" data-component="query"
+                                                   class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border"
+                                            >
+                                                                            </div>
+                                </div>
+                                                    </div>
+                    </div>
+                </div>
+            
+            
+            <div class="SendButtonHolder sl-mt-4 sl-p-4 sl-pt-0">
+                <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-center">
+                    <button type="button" data-endpoint="GETapi-classify-number"
+                            class="tryItOut-btn sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-bg-primary hover:sl-bg-primary-dark active:sl-bg-primary-darker disabled:sl-bg-canvas-100 sl-text-on-primary disabled:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70"
+                    >
+                        Send Request 💥
+                    </button>
+                </div>
+            </div>
+
+            <div data-endpoint="GETapi-classify-number"
+                 class="tryItOut-error expandable sl-panel sl-outline-none sl-w-full" hidden>
+                <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
+                     role="button">
+                    <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
+                        <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
+                            <svg aria-hidden="true" focusable="false" data-prefix="fas"
+                                 data-icon="caret-down"
+                                 class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
+                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                                <path fill="currentColor"
+                                      d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
+                            </svg>
+                        </div>
+                        Request failed with error
+                    </div>
+                </div>
+                <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
+                    <div class="sl-panel__content sl-p-4">
+                        <p class="sl-pb-2"><strong class="error-message"></strong></p>
+                        <p class="sl-pb-2">Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</p>
+                    </div>
+                </div>
+            </div>
+
+                <div data-endpoint="GETapi-classify-number"
+                     class="tryItOut-response expandable sl-panel sl-outline-none sl-w-full" hidden>
+                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
+                         role="button">
+                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
+                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
+                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
+                                     data-icon="caret-down"
+                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
+                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                                    <path fill="currentColor"
+                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
+                                </svg>
+                            </div>
+                            Received response
+                        </div>
+                    </div>
+                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
+                        <div class="sl-panel__content sl-p-4">
+                            <p class="sl-pb-2 response-status"></p>
+                            <pre><code class="sl-pb-2 response-content language-json"
+                                       data-empty-response-text="<Empty response>"
+                                       style="max-height: 300px;"></code></pre>
+                        </div>
+                    </div>
+                </div>
+        </form>
+    </div>
+</div>
                 
                                             <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
                             <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
@@ -524,7 +811,7 @@ perfectness, Armstrong status, odd/even status, digit sum and a fun math fact.</
                                     <div class="sl-px-0 sl-py-1">
                                         <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
                                             <pre><code class="language-bash">curl --request GET \
-    --get "https://hng12-backend.koyeb.app/api/api/stage-one?number=153" \
+    --get "https://hng12-backend.koyeb.app/api/classify-number?number=371" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre>                                        </div>
                                     </div>
@@ -534,11 +821,11 @@ perfectness, Armstrong status, odd/even status, digit sum and a fun math fact.</
                                     <div class="sl-px-0 sl-py-1">
                                         <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
                                             <pre><code class="language-javascript">const url = new URL(
-    "https://hng12-backend.koyeb.app/api/api/stage-one"
+    "https://hng12-backend.koyeb.app/api/classify-number"
 );
 
 const params = {
-    "number": "153",
+    "number": "371",
 };
 Object.keys(params)
     .forEach(key =&gt; url.searchParams.append(key, params[key]));
@@ -559,7 +846,7 @@ fetch(url, {
                                     <div class="sl-px-0 sl-py-1">
                                         <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
                                             <pre><code class="language-php">$client = new \GuzzleHttp\Client();
-$url = 'https://hng12-backend.koyeb.app/api/api/stage-one';
+$url = 'https://hng12-backend.koyeb.app/api/classify-number';
 $response = $client-&gt;get(
     $url,
     [
@@ -568,7 +855,7 @@ $response = $client-&gt;get(
             'Accept' =&gt; 'application/json',
         ],
         'query' =&gt; [
-            'number' =&gt; '153',
+            'number' =&gt; '371',
         ],
     ]
 );
@@ -583,9 +870,9 @@ print_r(json_decode((string) $body));</code></pre>                              
                                             <pre><code class="language-python">import requests
 import json
 
-url = 'https://hng12-backend.koyeb.app/api/api/stage-one'
+url = 'https://hng12-backend.koyeb.app/api/classify-number'
 params = {
-  'number': '153',
+  'number': '371',
 }
 headers = {
   'Content-Type': 'application/json',
@@ -606,9 +893,9 @@ response.json()</code></pre>                                        </div>
                                             <div class="sl-mb-2 sl-inline-block">Example response:</div>
                                             <div class="sl-mb-2 sl-inline-block">
                                                 <select
-                                                        class="example-response-GETapi-stage-one-toggle sl-text-base"
+                                                        class="example-response-GETapi-classify-number-toggle sl-text-base"
                                                         aria-label="Response sample"
-                                                        onchange="switchExampleResponse('GETapi-stage-one', event.target.value);">
+                                                        onchange="switchExampleResponse('GETapi-classify-number', event.target.value);">
                                                                                                             <option value="0">200</option>
                                                                                                             <option value="1">400, Invalid Input</option>
                                                                                                     </select></div>
@@ -627,25 +914,25 @@ response.json()</code></pre>                                        </div>
                                     </div>
                                 </button>
                             </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-GETapi-stage-one example-response-GETapi-stage-one-0"
+                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-GETapi-classify-number example-response-GETapi-classify-number-0"
                                      style=" "
                                 >
                                     <div class="sl-panel__content sl-p-0">                                                                                                                                
                                             <pre><code style="max-height: 300px;"
                                                        class="language-json sl-overflow-x-auto sl-overflow-y-auto">{
-    &quot;number&quot;: 153,
+    &quot;number&quot;: 371,
     &quot;is_prime&quot;: false,
     &quot;is_perfect&quot;: false,
     &quot;properties&quot;: [
         &quot;armstrong&quot;,
         &quot;odd&quot;
     ],
-    &quot;digit_sum&quot;: 9,
-    &quot;fun_fact&quot;: &quot;153 is the sum of the cubes of its own digits&quot;
+    &quot;digit_sum&quot;: 11,
+    &quot;fun_fact&quot;: &quot;371 is an Armstrong number because 3^3 + 7^3 + 1^3 = 371&quot;
 }</code></pre>
                                                                             </div>
                                 </div>
-                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-GETapi-stage-one example-response-GETapi-stage-one-1"
+                                                            <div class="sl-panel__content-wrapper sl-bg-canvas-100 example-response-GETapi-classify-number example-response-GETapi-classify-number-1"
                                      style=" display: none;"
                                 >
                                     <div class="sl-panel__content sl-p-0">                                                                                                                                
@@ -681,7 +968,7 @@ response.json()</code></pre>                                        </div>
         </div>
 
         <div class="sl-relative">
-            <div title="https://hng12-backend.koyeb.app/api/api/user"
+            <div title="https://hng12-backend.koyeb.app/api/user"
                      class="sl-stack sl-stack--horizontal sl-stack--3 sl-inline-flex sl-flex-row sl-items-center sl-max-w-full sl-font-mono sl-py-2 sl-pr-4 sl-bg-canvas-50 sl-rounded-lg"
                 >
                                             <div class="sl-text-lg sl-font-semibold sl-px-2.5 sl-py-1 sl-text-on-primary sl-rounded-lg"
@@ -691,7 +978,7 @@ response.json()</code></pre>                                        </div>
                         </div>
                                         <div class="sl-flex sl-overflow-x-hidden sl-text-lg sl-select-all">
                         <div dir="rtl"
-                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">https://hng12-backend.koyeb.app/api</div>
+                             class="sl-overflow-x-hidden sl-truncate sl-text-muted">https://hng12-backend.koyeb.app</div>
                         <div class="sl-flex-1 sl-font-semibold">/api/user</div>
                     </div>
 
@@ -816,6 +1103,127 @@ response.json()</code></pre>                                        </div>
         <div data-testid="two-column-right" class="sl-relative sl-w-2/5 sl-ml-16" style="max-width: 500px;">
             <div class="sl-stack sl-stack--vertical sl-stack--6 sl-flex sl-flex-col sl-items-stretch">
 
+                                    <div class="sl-inverted">
+    <div class="sl-overflow-y-hidden sl-rounded-lg">
+        <form class="TryItPanel sl-bg-canvas-100 sl-rounded-lg"
+              data-method="GET"
+              data-path="api/user"
+              data-hasfiles="0"
+              data-hasjsonbody="0">
+            
+                            <div class="sl-panel sl-outline-none sl-w-full expandable">
+                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
+                         role="button">
+                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
+                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
+                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
+                                     data-icon="caret-down"
+                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
+                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                                    <path fill="currentColor"
+                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
+                                </svg>
+                            </div>
+                            Headers
+                        </div>
+                    </div>
+                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
+                        <div class="ParameterGrid sl-p-4">
+                                                                                            <label aria-hidden="true"
+                                       for="header-GETapi-user-Content-Type">Content-Type</label>
+                                <span class="sl-mx-3">:</span>
+                                <div class="sl-flex sl-flex-1">
+                                    <div class="sl-input sl-flex-1 sl-relative">
+                                        <input aria-label="Content-Type" name="Content-Type"
+                                               id="header-GETapi-user-Content-Type"
+                                               value="application/json" data-component="header"
+                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
+                                    </div>
+                                </div>
+                                                                                            <label aria-hidden="true"
+                                       for="header-GETapi-user-Accept">Accept</label>
+                                <span class="sl-mx-3">:</span>
+                                <div class="sl-flex sl-flex-1">
+                                    <div class="sl-input sl-flex-1 sl-relative">
+                                        <input aria-label="Accept" name="Accept"
+                                               id="header-GETapi-user-Accept"
+                                               value="application/json" data-component="header"
+                                               class="sl-relative sl-w-full sl-h-md sl-text-base sl-pr-2.5 sl-pl-2.5 sl-rounded sl-border-transparent hover:sl-border-input focus:sl-border-primary sl-border">
+                                    </div>
+                                </div>
+                                                    </div>
+                    </div>
+                </div>
+            
+            
+            
+            
+            <div class="SendButtonHolder sl-mt-4 sl-p-4 sl-pt-0">
+                <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-center">
+                    <button type="button" data-endpoint="GETapi-user"
+                            class="tryItOut-btn sl-button sl-h-sm sl-text-base sl-font-medium sl-px-1.5 sl-bg-primary hover:sl-bg-primary-dark active:sl-bg-primary-darker disabled:sl-bg-canvas-100 sl-text-on-primary disabled:sl-text-body sl-rounded sl-border-transparent sl-border disabled:sl-opacity-70"
+                    >
+                        Send Request 💥
+                    </button>
+                </div>
+            </div>
+
+            <div data-endpoint="GETapi-user"
+                 class="tryItOut-error expandable sl-panel sl-outline-none sl-w-full" hidden>
+                <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
+                     role="button">
+                    <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
+                        <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
+                            <svg aria-hidden="true" focusable="false" data-prefix="fas"
+                                 data-icon="caret-down"
+                                 class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
+                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                                <path fill="currentColor"
+                                      d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
+                            </svg>
+                        </div>
+                        Request failed with error
+                    </div>
+                </div>
+                <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
+                    <div class="sl-panel__content sl-p-4">
+                        <p class="sl-pb-2"><strong class="error-message"></strong></p>
+                        <p class="sl-pb-2">Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</p>
+                    </div>
+                </div>
+            </div>
+
+                <div data-endpoint="GETapi-user"
+                     class="tryItOut-response expandable sl-panel sl-outline-none sl-w-full" hidden>
+                    <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-4 sl-pl-3 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-cursor-pointer sl-select-none"
+                         role="button">
+                        <div class="sl-flex sl-flex-1 sl-items-center sl-h-lg">
+                            <div class="sl-flex sl-items-center sl-mr-1.5 expansion-chevrons expansion-chevrons-solid expanded">
+                                <svg aria-hidden="true" focusable="false" data-prefix="fas"
+                                     data-icon="caret-down"
+                                     class="svg-inline--fa fa-caret-down fa-fw sl-icon" role="img"
+                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                                    <path fill="currentColor"
+                                          d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"></path>
+                                </svg>
+                            </div>
+                            Received response
+                        </div>
+                    </div>
+                    <div class="sl-panel__content-wrapper sl-bg-canvas-100 children" role="region">
+                        <div class="sl-panel__content sl-p-4">
+                            <p class="sl-pb-2 response-status"></p>
+                            <pre><code class="sl-pb-2 response-content language-json"
+                                       data-empty-response-text="<Empty response>"
+                                       style="max-height: 300px;"></code></pre>
+                        </div>
+                    </div>
+                </div>
+        </form>
+    </div>
+</div>
                 
                                             <div class="sl-panel sl-outline-none sl-w-full sl-rounded-lg">
                             <div class="sl-panel__titlebar sl-flex sl-items-center sl-relative focus:sl-z-10 sl-text-base sl-leading-none sl-pr-3 sl-pl-4 sl-bg-canvas-200 sl-text-body sl-border-input focus:sl-border-primary sl-select-none">
@@ -838,7 +1246,7 @@ response.json()</code></pre>                                        </div>
                                     <div class="sl-px-0 sl-py-1">
                                         <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
                                             <pre><code class="language-bash">curl --request GET \
-    --get "https://hng12-backend.koyeb.app/api/api/user" \
+    --get "https://hng12-backend.koyeb.app/api/user" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre>                                        </div>
                                     </div>
@@ -848,7 +1256,7 @@ response.json()</code></pre>                                        </div>
                                     <div class="sl-px-0 sl-py-1">
                                         <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
                                             <pre><code class="language-javascript">const url = new URL(
-    "https://hng12-backend.koyeb.app/api/api/user"
+    "https://hng12-backend.koyeb.app/api/user"
 );
 
 const headers = {
@@ -867,7 +1275,7 @@ fetch(url, {
                                     <div class="sl-px-0 sl-py-1">
                                         <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
                                             <pre><code class="language-php">$client = new \GuzzleHttp\Client();
-$url = 'https://hng12-backend.koyeb.app/api/api/user';
+$url = 'https://hng12-backend.koyeb.app/api/user';
 $response = $client-&gt;get(
     $url,
     [
@@ -888,7 +1296,7 @@ print_r(json_decode((string) $body));</code></pre>                              
                                             <pre><code class="language-python">import requests
 import json
 
-url = 'https://hng12-backend.koyeb.app/api/api/user'
+url = 'https://hng12-backend.koyeb.app/api/user'
 headers = {
   'Content-Type': 'application/json',
   'Accept': 'application/json'

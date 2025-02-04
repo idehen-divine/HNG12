@@ -17,15 +17,15 @@ class NumberController extends Controller
      * Analyzes a number and returns its mathematical properties including primality,
      * perfectness, Armstrong status, odd/even status, digit sum and a fun math fact.
      *
-     * @queryParam number integer required The number to analyze. Example: 153
+     * @queryParam number integer required The number to analyze. Example: 371
      *
      * @response 200 {
-     *   "number": 153,
+     *   "number": 371,
      *   "is_prime": false,
      *   "is_perfect": false,
      *   "properties": ["armstrong", "odd"],
-     *   "digit_sum": 9,
-     *   "fun_fact": "153 is the sum of the cubes of its own digits"
+     *   "digit_sum": 11,
+     *   "fun_fact": "371 is an Armstrong number because 3^3 + 7^3 + 1^3 = 371"
      * }
      *
      * @response 400 scenario="Invalid Input" {
