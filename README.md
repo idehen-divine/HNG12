@@ -4,7 +4,7 @@ This project is part of the HNG12 Internship tasks for backend developers. It is
 
 ## Project Description
 
-### Stage: 0
+### Stage 0: API to Retrieve Basic Information
 This API provides the following information:
 - **Email:** My registered email address on the HNG12 Slack workspace.
 - **Current DateTime:** The current date and time in ISO 8601 format (UTC).
@@ -17,6 +17,20 @@ This API provides the following information:
 - **CORS Support:** Configured to allow cross-origin requests.
 - **Built with Laravel:** Utilizes Laravel's robust framework to build RESTful APIs.
 - **Continuous Deployment:** Integrated with GitHub Actions for automatic deployment.
+
+### Stage 1: Number Classification API
+
+This API classifies a given number based on mathematical properties and provides a fun fact about it.
+
+#### Features
+
+- **Classifies a Number:** Determines if the number is **prime, perfect, Armstrong, even, or odd**.
+- **Computes Digit Sum:** Sums up the digits of the number.
+- **Fetches a Fun Fact:** Retrieves a fun fact from the Numbers API.
+- **Public API Endpoint:** Accepts GET requests and returns a JSON response.
+- **CORS Support:** Configured to allow cross-origin requests.
+- **Built with Laravel:** Uses Laravel's RESTful API capabilities.
+- **Deployed & Publicly Accessible:** Available online for testing.
 
 ## Technologies Used
 
